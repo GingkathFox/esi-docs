@@ -42,12 +42,12 @@ const questions = [{
 // Start program
 async function start() {
     // create the challenge
-    const codeChallenge = await crypto.randomBytes(32).toString('base64').replace("=", "")
+    const codeChallenge = encodeURI(await crypto.randomBytes(32).toString('base64'))
     // ^ Create the 32 byte string in base64...
     const hashedCodeChallenge = await crypto.createHash('sha256')
     await hashedCodeChallenge.update(codeChallenge)
-    const digestedHash = await hashedCodeChallenge.digest('base64').replace("=", "")
-    // ^ ...and hash it
+    const digestedHash = await hashedCodeChallenge.digest('base64')
+    // ^ ...hash it, and save the digest
 
     // now start the program
     // Grab the client ID...
@@ -61,7 +61,6 @@ async function start() {
     await Inquirer.prompt(questions[1]) // no "const" since input isn't needed
 
     // create the parameters...
-    console.log(digestedHash)
     let query = params
     query.client_id = clientID
     query.code_challenge = digestedHash
@@ -79,13 +78,13 @@ async function start() {
     let form = form_values
     form.client_id = clientID
     form.code = code
-    form.code_verifier = codeChallenge.replace("=", "")
+    form.code_verifier = codeChallenge
 
     const res = await sendTokenRequest(form)
     const token = await validateToken(res)
     console.log(`\nThe contents of the access token are: ${JSON.stringify(token, null, 2)}`)
 }
 start().catch(e => {
-    console.error(e.stack, JSON.stringify(e, null, 2))
+    console.error(e.response.data)
     process.exit()
 })

@@ -42,7 +42,7 @@ module.exports = {
             }
             fullURL += `&${queryKey}=${query[queryKey]}`
         })
-        return encodeURI(fullURL).replace("&", "?") // encode the URI and replace the first & with a ?
+        return fullURL.replace("&", "?") // encode the URI and replace the first & with a ?
     },
     async sendTokenRequest(body) {
         try {
