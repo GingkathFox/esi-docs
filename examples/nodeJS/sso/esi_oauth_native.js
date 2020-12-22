@@ -46,7 +46,7 @@ async function start() {
     // ^ Create the 32 byte string in base64...
     const hashedCodeChallenge = await crypto.createHash('sha256')
     await hashedCodeChallenge.update(codeChallenge)
-    const digestedHash = await hashedCodeChallenge.digest('base64')
+    const digestedHash = await hashedCodeChallenge.digest('base64').replace("=", "")
     // ^ ...and hash it
 
     // now start the program
@@ -79,13 +79,13 @@ async function start() {
     let form = form_values
     form.client_id = clientID
     form.code = code
-    form.code_verifier = codeChallenge
+    form.code_verifier = codeChallenge.replace("=", "")
 
     const res = await sendTokenRequest(form)
     const token = await validateToken(res)
     console.log(`\nThe contents of the access token are: ${JSON.stringify(token, null, 2)}`)
 }
 start().catch(e => {
-    console.error(e.stack)
+    console.error(e.stack, JSON.stringify(e, null, 2))
     process.exit()
 })
