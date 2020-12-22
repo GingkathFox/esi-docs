@@ -1,2 +1,13 @@
+# Python
 .venv
 __pycache__
+
+# macOS stuff
+.DS_Store
+._*
+
+# NodeJS
+node_modules
+
+# VSCode
+.vscode

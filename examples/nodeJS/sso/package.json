@@ -1,0 +1,20 @@
+{
+  "name": "esi-oauth-sso-demo",
+  "version": "1.0.0",
+  "main": "esi_oauth_native.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "chalk": "^4.1.0",
+    "inquirer": "^7.3.3",
+    "jose": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.14"
+  }
+}
