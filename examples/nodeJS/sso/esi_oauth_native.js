@@ -42,10 +42,11 @@ const questions = [{
 // Start program
 async function start() {
     // create the challenge
-    const codeChallenge = await crypto.randomBytes(32).toString('base64')
+    const codeChallenge = await crypto.randomBytes(32).toString('base64').replace("=", "")
     // ^ Create the 32 byte string in base64...
     const hashedCodeChallenge = await crypto.createHash('sha256')
     await hashedCodeChallenge.update(codeChallenge)
+    const digestedHash = await hashedCodeChallenge.digest('base64')
     // ^ ...and hash it
 
     // now start the program
@@ -55,14 +56,15 @@ async function start() {
     const clientID = questionOne.clientID
 
     // ...generate the URL...
-    console.log(`\nBecause this is a desktop/mobile application, you should use the PKCE protocol when contacting the EVE SSO. In this case, that means sending a base 64 encoded sha256 hashed 32 byte string called a code challenge. This 32 byte string should be ephemeral and never stored anywhere. The code challenge string generated for this program is ${Chalk.yellowBright(codeChallenge)} and the hashed code challenge is ${Chalk.yellowBright(hashedCodeChallenge.digest('base64'))}.`)
+    console.log(`\nBecause this is a desktop/mobile application, you should use the PKCE protocol when contacting the EVE SSO. In this case, that means sending a base 64 encoded sha256 hashed 32 byte string called a code challenge. This 32 byte string should be ephemeral and never stored anywhere. The code challenge string generated for this program is ${Chalk.yellowBright(codeChallenge)} and the hashed code challenge is ${Chalk.yellowBright(digestedHash)}.`)
     console.log(`Notice that the query parameter of the following URL will contain this code challenge.\n`)
     await Inquirer.prompt(questions[1]) // no "const" since input isn't needed
 
     // create the parameters...
+    console.log(digestedHash)
     let query = params
     query.client_id = clientID
-    query.code_challenge = hashedCodeChallenge
+    query.code_challenge = digestedHash
     console.log(`\nOpen the following link in your browser:\n`)
     // ...display the url...
     const authURL = await createAuthURL(query)
@@ -77,7 +79,7 @@ async function start() {
     let form = form_values
     form.client_id = clientID
     form.code = code
-    form.code_verifier = codeChallenge.replace("=", "")
+    form.code_verifier = codeChallenge
 
     const res = await sendTokenRequest(form)
     const token = await validateToken(res)
