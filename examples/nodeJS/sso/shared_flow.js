@@ -8,6 +8,7 @@ const {
 const {
     parse
 } = require("path")
+const querystring = require('querystring')
 
 module.exports = {
     params: {
@@ -31,20 +32,11 @@ module.exports = {
     },
     createAuthURL(query) {
         const baseURL = `https://login.eveonline.com/v2/oauth/authorize/`
-        let fullURL = `${baseURL}`
-        Object.keys(query).forEach(queryKey => {
-            // query params undefined or empty, or array of length 0
-            if (query[queryKey] === undefined || query[queryKey] === '') {
-                return
-            }
-            if (query[queryKey].length && query[queryKey].length === 0) {
-                return
-            }
-            fullURL += `&${queryKey}=${encodeURIComponent(query[queryKey])}`
-        })
+        let fullURL = `${baseURL}&${querystring.stringify(query)}`
         return fullURL.replace("&", "?") // encode the URI and replace the first & with a ?
     },
     async sendTokenRequest(body) {
+        console.log(body)
         try {
             const res = await Axios.post("https://login.eveonline.com/v2/oauth/token", body, {
                 headers: module.exports.headers

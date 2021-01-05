@@ -1,6 +1,7 @@
 const Inquirer = require('inquirer')
 const Chalk = require('chalk')
 const crypto = require('crypto') // For the generation and hashing
+const querystring = require('querystring')
 const {
     createAuthURL,
     sendTokenRequest,
@@ -46,7 +47,7 @@ async function start() {
     // ^ Create the 32 byte string in base64...
     const hashedCodeChallenge = await crypto.createHash('sha256')
     await hashedCodeChallenge.update(codeChallenge)
-    const digestedHash = await hashedCodeChallenge.digest('base64')
+    const digestedHash = await hashedCodeChallenge.digest('base64').replace("=", "")
     // ^ ...hash it, and save the digest
 
     // now start the program
@@ -67,7 +68,7 @@ async function start() {
     console.log(`\nOpen the following link in your browser:\n`)
     // ...display the url...
     const authURL = await createAuthURL(query)
-    console.log(` ${authURL}\n`)
+    console.log(` ${Chalk.green(authURL)}\n`)
     console.log(` Once you have logged in as a character you will get redirected to ${Chalk.yellowBright("https://localhost/callback/.")}`)
 
     // ...prompt for the code...
@@ -76,25 +77,15 @@ async function start() {
 
     // ...and send the request...
     let form = form_values
-    let encodedValues = ``
     form.code = code
     form.client_id = clientID
     form.code_verifier = codeChallenge
 
-    Object.keys(form).forEach(formKey => {
-        encodedValues += `&${formKey}=${encodeURIComponent(form[formKey])}`
-    })
-
-    encodedValues = encodedValues.split('')
-    encodedValues.shift()
-    encodedValues = encodedValues.join('')
-    // ^ gotta do this cause splice is not a function, for some odd reason
-
-    const res = await sendTokenRequest(encodedValues)
+    const res = await sendTokenRequest(querystring.stringify(form))
     const token = await validateToken(res)
     console.log(`\nThe contents of the access token are: ${JSON.stringify(token, null, 2)}`)
 }
 start().catch(e => {
-    console.error(e.response.data)
+    console.error(e.response.data || e.stack)
     process.exit()
 })
