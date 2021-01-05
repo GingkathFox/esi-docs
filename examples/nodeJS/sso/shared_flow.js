@@ -40,7 +40,7 @@ module.exports = {
             if (query[queryKey].length && query[queryKey].length === 0) {
                 return
             }
-            fullURL += `&${queryKey}=${query[queryKey]}`
+            fullURL += `&${queryKey}=${encodeURIComponent(query[queryKey])}`
         })
         return fullURL.replace("&", "?") // encode the URI and replace the first & with a ?
     },

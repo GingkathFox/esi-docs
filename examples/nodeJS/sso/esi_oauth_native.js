@@ -42,7 +42,7 @@ const questions = [{
 // Start program
 async function start() {
     // create the challenge
-    const codeChallenge = encodeURI(await crypto.randomBytes(32).toString('base64'))
+    const codeChallenge = await crypto.randomBytes(32).toString('base64')
     // ^ Create the 32 byte string in base64...
     const hashedCodeChallenge = await crypto.createHash('sha256')
     await hashedCodeChallenge.update(codeChallenge)
@@ -76,11 +76,21 @@ async function start() {
 
     // ...and send the request...
     let form = form_values
-    form.client_id = clientID
+    let encodedValues = ``
     form.code = code
+    form.client_id = clientID
     form.code_verifier = codeChallenge
 
-    const res = await sendTokenRequest(form)
+    Object.keys(form).forEach(formKey => {
+        encodedValues += `&${formKey}=${encodeURIComponent(form[formKey])}`
+    })
+
+    encodedValues = encodedValues.split('')
+    encodedValues.shift()
+    encodedValues = encodedValues.join('')
+    // ^ gotta do this cause splice is not a function, for some odd reason
+
+    const res = await sendTokenRequest(encodedValues)
     const token = await validateToken(res)
     console.log(`\nThe contents of the access token are: ${JSON.stringify(token, null, 2)}`)
 }
